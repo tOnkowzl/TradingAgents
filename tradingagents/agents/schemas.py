@@ -132,9 +132,25 @@ class TraderProposal(BaseModel):
         default=None,
         description="Optional stop-loss price in the instrument's quote currency.",
     )
+    take_profit: Optional[float] = Field(
+        default=None,
+        description="Optional take-profit price in the instrument's quote currency.",
+    )
+    leverage: Optional[float] = Field(
+        default=None,
+        description=(
+            "Optional applied position leverage. Choose dynamically from the "
+            "setup's risk, liquidity, volatility, and invalidation distance; "
+            "do not simply use the instrument's maximum leverage."
+        ),
+    )
     position_sizing: Optional[str] = Field(
         default=None,
-        description="Optional sizing guidance, e.g. '5% of portfolio'.",
+        description=(
+            "Optional sizing guidance. Express the reasoning and constraints; "
+            "do not rely on a fixed numeric allocation when the setup requires "
+            "dynamic sizing."
+        ),
     )
 
 
@@ -154,6 +170,10 @@ def render_trader_proposal(proposal: TraderProposal) -> str:
         parts.extend(["", f"**Entry Price**: {proposal.entry_price}"])
     if proposal.stop_loss is not None:
         parts.extend(["", f"**Stop Loss**: {proposal.stop_loss}"])
+    if proposal.take_profit is not None:
+        parts.extend(["", f"**Take Profit**: {proposal.take_profit}"])
+    if proposal.leverage is not None:
+        parts.extend(["", f"**Leverage**: {proposal.leverage}"])
     if proposal.position_sizing:
         parts.extend(["", f"**Position Sizing**: {proposal.position_sizing}"])
     parts.extend([
@@ -200,6 +220,34 @@ class PortfolioDecision(BaseModel):
         default=None,
         description="Optional target price in the instrument's quote currency.",
     )
+    stop_loss: Optional[float] = Field(
+        default=None,
+        description=(
+            "Required for Buy / Overweight / Underweight / Sell execution calls: "
+            "the stop-loss price in the instrument's quote currency. Leave empty "
+            "only when the final rating is Hold / no trade."
+        ),
+    )
+    take_profit: Optional[float] = Field(
+        default=None,
+        description=(
+            "Required for Buy / Overweight / Underweight / Sell execution calls: "
+            "the take-profit price in the instrument's quote currency. Leave empty "
+            "only when the final rating is Hold / no trade."
+        ),
+    )
+    leverage: Optional[float] = Field(
+        default=None,
+        description=(
+            "Required for Buy / Overweight / Underweight / Sell execution calls: "
+            "the applied leverage selected from account/risk/liquidity/volatility "
+            "context. Do not copy the exchange max leverage. Leave empty only for Hold."
+        ),
+    )
+    invalidation: Optional[str] = Field(
+        default=None,
+        description="Optional plain-English condition that invalidates the trade thesis.",
+    )
     time_horizon: Optional[str] = Field(
         default=None,
         description="Optional recommended holding period, e.g. '3-6 months'.",
@@ -223,6 +271,14 @@ def render_pm_decision(decision: PortfolioDecision) -> str:
     ]
     if decision.price_target is not None:
         parts.extend(["", f"**Price Target**: {decision.price_target}"])
+    if decision.stop_loss is not None:
+        parts.extend(["", f"**Stop Loss**: {decision.stop_loss}"])
+    if decision.take_profit is not None:
+        parts.extend(["", f"**Take Profit**: {decision.take_profit}"])
+    if decision.leverage is not None:
+        parts.extend(["", f"**Leverage**: {decision.leverage}"])
+    if decision.invalidation:
+        parts.extend(["", f"**Invalidation**: {decision.invalidation}"])
     if decision.time_horizon:
         parts.extend(["", f"**Time Horizon**: {decision.time_horizon}"])
     return "\n".join(parts)

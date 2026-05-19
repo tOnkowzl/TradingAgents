@@ -44,7 +44,11 @@ def create_trader(llm):
                     f"insights from current technical market trends, macroeconomic indicators, and "
                     f"social media sentiment. Use this plan as a foundation for evaluating your next "
                     f"trading decision.\n\nProposed Investment Plan: {investment_plan}\n\n"
-                    f"Leverage these insights to make an informed and strategic decision."
+                    f"Execution requirement: if your proposal is Buy or Sell, include entry_price, "
+                    f"stop_loss, take_profit, applied leverage, and sizing rationale. Choose leverage "
+                    f"dynamically from risk, liquidity, volatility, and invalidation distance; do not "
+                    f"copy instrument max leverage. If you cannot define a coherent risk envelope, "
+                    f"choose Hold instead."
                 ),
             },
         ]

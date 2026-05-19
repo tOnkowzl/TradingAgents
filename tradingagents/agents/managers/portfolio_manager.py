@@ -61,7 +61,15 @@ def create_portfolio_manager(llm):
 
 ---
 
-Be decisive and ground every conclusion in specific evidence from the analysts.{get_language_instruction()}"""
+Be decisive and ground every conclusion in specific evidence from the analysts.
+
+Execution-risk requirement:
+- If the final rating is Buy, Overweight, Underweight, or Sell, include stop_loss, take_profit, applied leverage, and invalidation.
+- Choose leverage dynamically from risk, liquidity, volatility, edge quality, and invalidation distance; never copy the instrument's maximum leverage as the applied leverage.
+- For long exposure, risk levels must satisfy stop_loss < entry/current price < take_profit.
+- For short/reduce exposure, risk levels must satisfy take_profit < entry/current price < stop_loss.
+- If the debate does not justify coherent executable levels, choose Hold instead of emitting a trade-like rating without a risk envelope.
+{get_language_instruction()}"""
 
         final_trade_decision = invoke_structured_or_freetext(
             structured_llm,

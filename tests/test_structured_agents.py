@@ -13,10 +13,12 @@ import pytest
 
 from tradingagents.agents.managers.research_manager import create_research_manager
 from tradingagents.agents.schemas import (
+    PortfolioDecision,
     PortfolioRating,
     ResearchPlan,
     TraderAction,
     TraderProposal,
+    render_pm_decision,
     render_research_plan,
     render_trader_proposal,
 )
@@ -45,13 +47,17 @@ class TestRenderTraderProposal:
             reasoning="Strong technicals + fundamentals.",
             entry_price=189.5,
             stop_loss=178.0,
-            position_sizing="6% of portfolio",
+            take_profit=214.0,
+            leverage=2.0,
+            position_sizing="dynamic sizing based on volatility and liquidity",
         )
         md = render_trader_proposal(p)
         assert "**Action**: Buy" in md
         assert "**Entry Price**: 189.5" in md
         assert "**Stop Loss**: 178.0" in md
-        assert "**Position Sizing**: 6% of portfolio" in md
+        assert "**Take Profit**: 214.0" in md
+        assert "**Leverage**: 2.0" in md
+        assert "**Position Sizing**: dynamic sizing based on volatility and liquidity" in md
         assert "FINAL TRANSACTION PROPOSAL: **BUY**" in md
 
     def test_optional_fields_omitted_when_absent(self):
@@ -85,6 +91,27 @@ class TestRenderResearchPlan:
             )
             md = render_research_plan(p)
             assert f"**Recommendation**: {rating.value}" in md
+
+
+@pytest.mark.unit
+class TestRenderPortfolioDecision:
+    def test_execution_risk_fields_included_when_present(self):
+        p = PortfolioDecision(
+            rating=PortfolioRating.UNDERWEIGHT,
+            executive_summary="Reduce risk with a defined short envelope.",
+            investment_thesis="Momentum remains weak.",
+            stop_loss=2175.0,
+            take_profit=1980.0,
+            leverage=3.0,
+            invalidation="Close above reclaimed trend support.",
+            time_horizon="intraday to swing",
+        )
+        md = render_pm_decision(p)
+        assert "**Rating**: Underweight" in md
+        assert "**Stop Loss**: 2175.0" in md
+        assert "**Take Profit**: 1980.0" in md
+        assert "**Leverage**: 3.0" in md
+        assert "**Invalidation**: Close above reclaimed trend support." in md
 
 
 # ---------------------------------------------------------------------------
